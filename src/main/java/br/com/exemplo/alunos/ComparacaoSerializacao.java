@@ -2,24 +2,22 @@ package br.com.exemplo.alunos;
 
 import br.com.exemplo.alunos.proto.AlunoProtos;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ComparacaoSerializacao implements CommandLineRunner {
+public class ComparacaoSerializacao {
     private final ObjectMapper mapper;
 
     public ComparacaoSerializacao(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        Aluno original = new Aluno(1, "Ana Silva", "Ciência da Computação");
+    public void comparar(Aluno original) throws IOException {
         byte[] json = mapper.writeValueAsBytes(original);
         Aluno recuperadoJson = mapper.readValue(json, Aluno.class);
 
@@ -36,11 +34,12 @@ public class ComparacaoSerializacao implements CommandLineRunner {
         String textoJson = new String(json, StandardCharsets.UTF_8);
         double reducao = 100.0 * (json.length - protobuf.length) / json.length;
         String relatorio = String.format(Locale.ROOT,
-                "JSON (UTF-8): %s%nJSON: %d bytes%nProtobuf: %d bytes%n"
+                "%nComparação do aluno cadastrado — ID %d%n"
+                + "JSON (UTF-8): %s%nJSON: %d bytes%nProtobuf: %d bytes%n"
                 + "Redução neste exemplo: %.2f%%%n"
                 + "Desserialização JSON e Protobuf: dados preservados.%n",
-                textoJson, json.length, protobuf.length, reducao);
-        Path pasta = Path.of("target", "comparacao");
+                original.id(), textoJson, json.length, protobuf.length, reducao);
+        Path pasta = Path.of("target", "comparacao", "aluno-" + original.id());
         Files.createDirectories(pasta);
         Files.write(pasta.resolve("aluno.json"), json);
         Files.write(pasta.resolve("aluno.pb"), protobuf);

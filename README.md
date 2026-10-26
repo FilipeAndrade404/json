@@ -53,17 +53,21 @@ No Postman, envie POST para `/alunos`, selecione Body → raw → JSON e informe
 
 ## Serialização e medição
 
-Ao iniciar, `ComparacaoSerializacao` cria o aluno abaixo, serializa e desserializa com Jackson e Protobuf, verifica a igualdade dos dados e imprime os tamanhos. Essa demonstração não insere o aluno no cadastro da API.
+A cada POST válido em `/alunos`, o servidor cadastra o aluno e chama `ComparacaoSerializacao` com os dados recebidos e o ID gerado. Ela serializa e desserializa com Jackson e Protobuf, verifica a igualdade dos dados e imprime no console o aluno, os tamanhos em bytes e a redução percentual. A comparação não é executada na inicialização nem em requisições inválidas.
+
+Por exemplo, para um cadastro que resulte neste aluno:
 
 ```json
 {"id":1,"nome":"Ana Silva","curso":"Ciência da Computação"}
 ```
 
-Os arquivos são gravados em `target/comparacao/`:
+Os arquivos são gravados em `target/comparacao/aluno-{id}/` (por exemplo, `target/comparacao/aluno-1/`):
 
 - `aluno.json`: JSON compacto em UTF-8, sem quebra de linha.
 - `aluno.pb`: mensagem binária Protobuf.
 - `resultado.txt`: texto JSON gerado, tamanhos e resultado da desserialização.
+
+Para demonstrar no Postman, envie um POST e volte ao console Run do IntelliJ. Aparecerá `Comparação do aluno cadastrado — ID ...`, seguido do JSON e dos tamanhos. Altere o nome ou o curso e envie novamente para ver uma nova comparação. A resposta HTTP continua sendo o aluno em JSON com status 201. Os arquivos de cada ID são sobrescritos se o mesmo ID for reutilizado após reiniciar a aplicação.
 
 | Critério | JSON | Protobuf |
 | --- | --- | --- |
@@ -91,7 +95,7 @@ REST é um estilo de arquitetura e não obriga o uso de JSON. Uma API pode trans
 - `AlunoRepository`: armazenamento em memória com geração de IDs segura para requisições concorrentes.
 - `AlunoController`: cadastro e consulta por HTTP.
 - `ComparacaoSerializacao`: conversão, leitura e medição dos dois formatos.
-- `AlunoApiTest`: criação, consulta, Location, 404 e entradas inválidas.
+- `AlunoApiTest`: criação, consulta, Location, 404, entradas inválidas e comparação de cada aluno cadastrado.
 - `SerializacaoTest`: preservação de acentos e tamanhos dos payloads.
 
 Referências: [Spring Boot](https://spring.io/guides/gs/spring-boot) e [guia Java do Protobuf](https://protobuf.dev/getting-started/javatutorial/).
