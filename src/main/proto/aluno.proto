@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package cadastro;
+option java_package = "br.com.exemplo.alunos.proto";
+option java_outer_classname = "AlunoProtos";
+
+message Aluno {
+  int64 id = 1;
+  string nome = 2;
+  string curso = 3;
+}
